@@ -1,0 +1,10 @@
+{
+    "packages": {
+        ".": {
+            "release-type": "simple",
+            "package-name": "kong-oidc-v3",
+            "version-file": "VERSION"
+        }
+    },
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please-action/v3/schema.json"
+}

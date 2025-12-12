@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - fix/oidc-session-kong-3.9 # Added for testing, remove later or user will merge to main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          package-name: kong-oidc-v3
+
+      - uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: leafo/gh-actions-lua@v9
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          luaVersion: "5.1"
+
+      - uses: leafo/gh-actions-luarocks@v4
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Publish to LuaRocks
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+          VERSION: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          # Find existing rockspec
+          OLD_ROCKSPEC=$(ls *.rockspec | head -n 1)
+          NEW_ROCKSPEC="kong-oidc-v3-${VERSION}-1.rockspec"
+          
+          echo "Migrating $OLD_ROCKSPEC to $NEW_ROCKSPEC based on Release ${TAG}"
+          
+          cp "$OLD_ROCKSPEC" "$NEW_ROCKSPEC"
+          
+          # Update version and tag
+          sed -i "s/version = .*/version = \"${VERSION}-1\"/" "$NEW_ROCKSPEC"
+          sed -i "s/tag = .*/tag = \"${TAG}\"/" "$NEW_ROCKSPEC"
+          
+          echo "--- New Rockspec Content ---"
+          head -n 20 "$NEW_ROCKSPEC"
+          echo "----------------------------"
+          
+          luarocks upload "$NEW_ROCKSPEC" --api-key="$LUAROCKS_API_KEY"
