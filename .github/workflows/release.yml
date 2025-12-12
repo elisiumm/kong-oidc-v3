@@ -18,7 +18,7 @@ jobs:
         id: release
         with:
           release-type: simple
-          package-name: kong-oidc-v3
+          package-name: kong-openidconnect-code-flow-v3
 
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
@@ -40,14 +40,14 @@ jobs:
         run: |
           # Find existing rockspec
           OLD_ROCKSPEC=$(ls *.rockspec | head -n 1)
-          NEW_ROCKSPEC="kong-oidc-v3-${VERSION}-1.rockspec"
+          NEW_ROCKSPEC="kong-openidconnect-code-flow-v3-${VERSION}-0.rockspec"
           
           echo "Migrating $OLD_ROCKSPEC to $NEW_ROCKSPEC based on Release ${TAG}"
           
           cp "$OLD_ROCKSPEC" "$NEW_ROCKSPEC"
           
           # Update version and tag (preserve trailing comma for Lua syntax)
-          sed -i "s/version = .*/version = \"${VERSION}-1\"/" "$NEW_ROCKSPEC"
+          sed -i "s/version = .*/version = \"${VERSION}-0\"/" "$NEW_ROCKSPEC"
           sed -i "s/tag = .*/tag = \"${TAG}\",/" "$NEW_ROCKSPEC"
           
           echo "--- New Rockspec Content ---"
