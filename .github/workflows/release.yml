@@ -44,7 +44,9 @@ jobs:
           
           echo "Migrating $OLD_ROCKSPEC to $NEW_ROCKSPEC based on Release ${TAG}"
           
-          cp "$OLD_ROCKSPEC" "$NEW_ROCKSPEC"
+          if [ "$OLD_ROCKSPEC" != "$NEW_ROCKSPEC" ]; then
+            cp "$OLD_ROCKSPEC" "$NEW_ROCKSPEC"
+          fi
           
           # Update version and tag (preserve trailing comma for Lua syntax)
           sed -i "s/version = .*/version = \"${VERSION}-0\"/" "$NEW_ROCKSPEC"
