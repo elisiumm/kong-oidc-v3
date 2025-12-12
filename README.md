@@ -61,7 +61,7 @@ The plugin will try to retrieve the user's groups from a field in the token (def
 
 **kong-oidc** depends on the following package:
 
-- [`lua-resty-openidc`](https://github.com/zmartzone/lua-resty-openidc/)
+- [`lua-resty-openidc`](https://github.com/zmartzone/lua-resty-openidc/) (version >= 1.7.6 is required for Kong 3.x compatibility)
 
 ## Installation
 
@@ -86,6 +86,11 @@ If you're using `luarocks` execute the following:
 | `config.scope`                              | openid                                     | false    | OAuth2 Token scope. To use OIDC it has to contains the `openid` scope                                                                                                                   |
 | `config.ssl_verify`                         | false                                      | false    | Enable SSL verification to OIDC Provider                                                                                                                                                |
 | `config.session_secret`                     |                                            | false    | Additional parameter, which is used to encrypt the session cookie. Needs to be random                                                                                                   |
+| `config.session_name`                       | session                                    | false    | Name of the session cookie                                                                                                                                                              |
+| `config.session_storage`                    | cookie                                     | false    | Storage mechanism for session (`cookie`, `shared`, `redis`, etc.)                                                                                                                       |
+| `config.session_cookie_samesite`            | None                                       | false    | Session cookie SameSite attribute (`Strict`, `Lax`, `None`, `off`). Defaults to `None` for OIDC compatibility.                                                                          |
+| `config.session_cookie_secure`              | true                                       | false    | Session cookie Secure attribute.                                                                                                                                                        |
+| `config.session_cookie_httponly`            | true                                       | false    | Session cookie HttpOnly attribute.                                                                                                                                                      |
 | `config.introspection_endpoint`             |                                            | false    | Token introspection endpoint                                                                                                                                                            |
 | `config.timeout`                            |                                            | false    | OIDC endpoint calls timeout                                                                                                                                                             |
 | `config.introspection_endpoint_auth_method` | client_secret_basic                        | false    | Token introspection authentication method. `resty-openidc` supports `client_secret_(basic\|post)`                                                                                       |
