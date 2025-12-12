@@ -1,5 +1,5 @@
 package = "kong-oidc-v3"
-version = "1.3.0-5"
+version = "1.3.1-1"
 source = {
     url = "git://github.com/Gate1106/kong-oidc-v3",
     tag = "1.0.0",
@@ -22,7 +22,7 @@ description = {
     license = "Apache 2.0"
 }
 dependencies = {
-    "lua-resty-openidc ~> 1.7.5-1"
+    "lua-resty-openidc ~> 1.7.6"
 }
 build = {
     type = "builtin",
@@ -34,3 +34,4 @@ build = {
     ["kong.plugins.oidc.utils"] = "kong/plugins/oidc/utils.lua"
     }
 }
+

@@ -92,7 +92,8 @@ function make_oidc(oidcConfig)
     -- constant for resty.oidc library
     unauth_action = "deny"
   end
-  local res, err = require("resty.openidc").authenticate(oidcConfig, ngx.var.request_uri, unauth_action)
+  -- FIX: Pass session_opts to authenticate for proper session configuration (SameSite=None)
+  local res, err = require("resty.openidc").authenticate(oidcConfig, ngx.var.request_uri, unauth_action, oidcConfig.session_opts)
 
   if err then
     if err == 'unauthorized request' then

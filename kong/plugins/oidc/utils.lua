@@ -45,7 +45,36 @@ function M.get_redirect_uri(ngx)
 end
 
 function M.get_options(config, ngx)
-  return {
+  -- Build session options with redundant keys for compatibility (v3/v4/openidc wrappers)
+  local session_opts = {
+    name = config.session_name or "session",
+    storage = config.session_storage or "cookie",
+    cookie = {
+      samesite = config.session_cookie_samesite or "None",
+      secure = config.session_cookie_secure ~= false,
+      httponly = config.session_cookie_httponly ~= false,
+      path = "/",
+      domain = nil
+    },
+    -- Flat keys sometimes used by bindings or older versions
+    cookie_same_site = config.session_cookie_samesite or "None",
+    cookie_secure = config.session_cookie_secure ~= false,
+    cookie_httponly = config.session_cookie_httponly ~= false,
+    cookie_path = "/"
+  }
+
+  -- Add session secret if configured (decode from base64)
+  if config.session_secret then
+    local decoded_secret = ngx.decode_base64(config.session_secret)
+    if decoded_secret then
+      session_opts.secret = decoded_secret
+    else
+      kong.log.warn("session_secret could not be decoded from base64, using as-is")
+      session_opts.secret = config.session_secret
+    end
+  end
+
+  local options = {
     client_id = config.client_id,
     client_secret = config.client_secret,
     discovery = config.discovery,
@@ -83,8 +112,10 @@ function M.get_options(config, ngx)
     bearer_jwt_auth_allowed_auds = config.bearer_jwt_auth_allowed_auds,
     bearer_jwt_auth_signing_algs = config.bearer_jwt_auth_signing_algs,
     header_names = config.header_names or {},
-    header_claims = config.header_claims or {}
+    header_claims = config.header_claims or {},
+    session_opts = session_opts
   }
+  return options
 end
 
 -- Function set_consumer is derived from the following kong auth plugins:
