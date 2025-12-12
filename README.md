@@ -67,7 +67,7 @@ The plugin will try to retrieve the user's groups from a field in the token (def
 
 If you're using `luarocks` execute the following:
 
-     luarocks install kong-oidc
+     luarocks install kong-oidc-v3
 
 [Kong >= 0.14] Since `KONG_CUSTOM_PLUGINS` has been removed, you also need to set the `KONG_PLUGINS` environment variable to include besides the bundled ones, oidc
 
@@ -126,7 +126,7 @@ Host: localhost:8001
 Content-Type: application/x-www-form-urlencoded
 Cache-Control: no-cache
 
-name=oidc&config.client_id=kong-oidc&config.client_secret=29d98bf7-168c-4874-b8e9-9ba5e7382fa0&config.discovery=https%3A%2F%2F<oidc_provider>%2F.well-known%2Fopenid-configuration
+name=oidc&config.client_id=kong-oidc&config.client_secret=29d98bf7-168c-4874-b8e9-9ba5e7382fa0&config.discovery=https%3A%2F%2F<oidc_provider>%2F.well-known%2Fopenid-configuration&config.session_secret=YourSessionSecretOf32CharsOrBytesBase64&config.session_cookie_samesite=None&config.session_cookie_secure=true
 ```
 
 To enable the plugin globally:
@@ -137,7 +137,7 @@ Host: localhost:8001
 Content-Type: application/x-www-form-urlencoded
 Cache-Control: no-cache
 
-name=oidc&config.client_id=kong-oidc&config.client_secret=29d98bf7-168c-4874-b8e9-9ba5e7382fa0&config.discovery=https%3A%2F%2F<oidc_provider>%2F.well-known%2Fopenid-configuration
+name=oidc&config.client_id=kong-oidc&config.client_secret=29d98bf7-168c-4874-b8e9-9ba5e7382fa0&config.discovery=https%3A%2F%2F<oidc_provider>%2F.well-known%2Fopenid-configuration&config.session_secret=YourSessionSecretOf32CharsOrBytesBase64&config.session_cookie_samesite=None&config.session_cookie_secure=true
 ```
 
 A successful response:
@@ -160,7 +160,10 @@ Server: kong/0.11.0
         "scope": "openid",
         "ssl_verify": "no",
         "client_secret": "29d98bf7-168c-4874-b8e9-9ba5e7382fa0",
-        "token_endpoint_auth_method": "client_secret_post"
+        "token_endpoint_auth_method": "client_secret_post",
+        "session_secret": "YourSessionSecretOf32CharsOrBytesBase64",
+        "session_cookie_samesite": "None",
+        "session_cookie_secure": true
     },
     "id": "58cc119b-e5d0-4908-8929-7d6ed73cb7de",
     "enabled": true,
