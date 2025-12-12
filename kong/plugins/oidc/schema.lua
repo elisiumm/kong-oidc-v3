@@ -127,6 +127,42 @@ return {
             }
           },
           {
+            session_cookie_samesite = {
+              type = "string",
+              required = false,
+              default = "None",
+              one_of = { "Strict", "Lax", "None", "off" }
+            }
+          },
+          {
+            session_cookie_secure = {
+              type = "boolean",
+              required = false,
+              default = true
+            }
+          },
+          {
+            session_cookie_httponly = {
+              type = "boolean",
+              required = false,
+              default = true
+            }
+          },
+          {
+            session_storage = {
+              type = "string",
+              required = false,
+              default = "cookie"
+            }
+          },
+          {
+            session_name = {
+              type = "string",
+              required = false,
+              default = "session"
+            }
+          },
+          {
             recovery_page_path = {
               type = "string"
             }
