@@ -2,7 +2,7 @@
     "packages": {
         ".": {
             "release-type": "simple",
-            "package-name": "kong-oidc-v3",
+            "package-name": "kong-openidconnect-code-flow-v3",
             "version-file": "VERSION"
         }
     },
