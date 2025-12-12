@@ -46,9 +46,9 @@ jobs:
           
           cp "$OLD_ROCKSPEC" "$NEW_ROCKSPEC"
           
-          # Update version and tag
+          # Update version and tag (preserve trailing comma for Lua syntax)
           sed -i "s/version = .*/version = \"${VERSION}-1\"/" "$NEW_ROCKSPEC"
-          sed -i "s/tag = .*/tag = \"${TAG}\"/" "$NEW_ROCKSPEC"
+          sed -i "s/tag = .*/tag = \"${TAG}\",/" "$NEW_ROCKSPEC"
           
           echo "--- New Rockspec Content ---"
           head -n 20 "$NEW_ROCKSPEC"
