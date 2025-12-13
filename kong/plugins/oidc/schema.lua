@@ -120,12 +120,7 @@ return {
 							default = "client_secret_post",
 						},
 					},
-					{
-						session_secret = {
-							type = "string",
-							required = false,
-						},
-					},
+
 					{
 						session_cookie_samesite = {
 							type = "string",
@@ -153,6 +148,7 @@ return {
 							type = "string",
 							required = false,
 							default = "cookie",
+							one_of = { "cookie", "redis", "memcached", "shm" },
 						},
 					},
 					{

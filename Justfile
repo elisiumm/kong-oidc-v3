@@ -13,6 +13,9 @@ test:
 lint:
     luacheck kong/plugins/oidc
 
+scan:
+    trivy fs . --config trivy.yaml
+
 # Start the Integration Environment (Kong + Redis)
 up:
     vagrant up

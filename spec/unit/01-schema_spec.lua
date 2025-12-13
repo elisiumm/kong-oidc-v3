@@ -15,8 +15,8 @@ describe("Schema", function()
 	it("contains redis configuration fields", function()
 		local has_redis = false
 		for _, field in ipairs(schema.fields) do
-			if field.config then
-				for _, config_field in ipairs(field.config) do
+			if field.config and field.config.fields then
+				for _, config_field in ipairs(field.config.fields) do
 					if config_field.session_redis_host then
 						has_redis = true
 					end

@@ -10,28 +10,13 @@ Vagrant.configure("2") do |config|
      config.vm.box = "perk/ubuntu-24.04-arm64"
      
      config.vm.provider "qemu" do |qe|
-       # Using user provided path, ensure qemu is installed via brew
+       # Global QEMU settings
        qe.qemu_dir = "/opt/homebrew/share/qemu"
        qe.arch = "aarch64"
-       qe.machine = "virt"
-       
-       # Port forwarding manually as qemu provider sometimes needs explicit args
-       # ssh_port is handled by vagrant usually, but user specified 50023
-       # qe.ssh_port = "50023" 
-       
-       # Forward Kong ports
-       # qe.extra_netdev_args = "hostfwd=tcp::8001-:8001,hostfwd=tcp::8002-:8002,hostfwd=tcp::8443-:8443"
-       # Note: Vagrant forwarded_port works with QEMU usually, let's try standard way first to keeps things clean, 
-       # or use user args if standard fails.
-       # User snippet was explicit about extra_netdev_args, let's inject them if we can't use config.vm.network
+       qe.machine = "virt,highmem=on,accel=hvf"
+       qe.memory = "2048"
      end
   end
-
-  # Configure Port Forwarding (Generic)
-  config.vm.network "forwarded_port", guest: 8000, host: 8000 # Proxy
-  config.vm.network "forwarded_port", guest: 8001, host: 8001 # Admin API
-  config.vm.network "forwarded_port", guest: 8002, host: 8002 # Admin GUI
-  config.vm.network "forwarded_port", guest: 8443, host: 8443 # Proxy SSL
 
   # VM Redis
   config.vm.define "redis" do |redis|
@@ -45,37 +30,53 @@ Vagrant.configure("2") do |config|
       sed -i 's/^bind 127.0.0.1 ::1/bind 0.0.0.0/' /etc/redis/redis.conf
       systemctl restart redis-server
     SHELL
+
+    redis.vm.provider "qemu" do |qe|
+       qe.ssh_port = "50030"
+       qe.extra_netdev_args = "hostfwd=tcp::6379-:6379"
+    end
   end
 
   # VM Kong
   config.vm.define "kong" do |kong|
     kong.vm.hostname = "kong-gateway"
+    kong.vm.provider "qemu" do |qe|
+       qe.ssh_port = "50031"
+       qe.extra_netdev_args = "hostfwd=tcp::8000-:8000,hostfwd=tcp::8001-:8001,hostfwd=tcp::8002-:8002,hostfwd=tcp::8443-:8443"
+    end
     kong.vm.provision "shell", inline: <<-SHELL
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
       apt-get install -y curl gnupg2 lsb-release
 
       # Kong 3.9 installation for Ubuntu Noble (24.04)
-      curl -sL https://packages.konghq.com/public/gpg.key | apt-key add -
-      echo "deb [arch=$(dpkg --print-architecture)] https://packages.konghq.com/ubuntu noble main" | tee /etc/apt/sources.list.d/kong.list
+      curl -1sLf "https://packages.konghq.com/public/gateway-39/gpg.B9DCD032B1696A89.key" | gpg --dearmor | tee /usr/share/keyrings/kong-gateway-39-archive-keyring.gpg > /dev/null
+      curl -1sLf "https://packages.konghq.com/public/gateway-39/config.deb.txt?distro=ubuntu&codename=noble" | tee /etc/apt/sources.list.d/kong-gateway-39.list > /dev/null
       
       apt-get update
-      # Install specific version 3.9 if available, or latest
-      apt-get install -y kong
+      apt-get install -y kong/noble
+      apt-get install -y zip
+      apt-get install -y postgresql postgresql-contrib
+      systemctl enable postgresql
 
-      # Setup dev environment
-      cp /etc/kong/kong.conf.default /etc/kong/kong.conf
-      echo "database = off" >> /etc/kong/kong.conf
-      echo "declarative_config = /vagrant/kong.yml" >> /etc/kong/kong.conf
+      echo "database = postgres" >> /etc/kong/kong.conf
+      echo "pg_host = 127.0.0.1" >> /etc/kong/kong.conf
+      echo "pg_port = 5432" >> /etc/kong/kong.conf
+      echo "pg_user = kong" >> /etc/kong/kong.conf
+      echo "pg_password = super_secret" >> /etc/kong/kong.conf
+      echo "pg_database = kong" >> /etc/kong/kong.conf
+      echo "admin_listen = 0.0.0.0:8001" >> /etc/kong/kong.conf
+      echo "admin_gui_listen = 0.0.0.0:8002" >> /etc/kong/kong.conf
+      echo "admin_gui_url = http://localhost:8002" >> /etc/kong/kong.conf
       echo "plugins = bundled,oidc" >> /etc/kong/kong.conf
-      echo "lua_package_path = /vagrant/?.lua;/vagrant/?/init.lua;;" >> /etc/kong/kong.conf
-      
-      # Allow admin api from outside
-      echo "admin_listen = 0.0.0.0:8001, 0.0.0.0:8444 ssl" >> /etc/kong/kong.conf
-      echo "proxy_listen = 0.0.0.0:8000, 0.0.0.0:8443 ssl" >> /etc/kong/kong.conf
-      
-      systemctl enable kong
-      systemctl restart kong
+
+      sudo -i -u postgres psql -c "CREATE USER kong WITH PASSWORD 'super_secret';"
+      sudo -i -u postgres psql -c "CREATE DATABASE kong OWNER kong;"
+
+      sudo luarocks install kong-openidconnect-code-flow-v3
+      sudo -E kong migrations bootstrap -c /etc/kong/kong.conf
+      sudo -E kong start -c /etc/kong/kong.conf
+
     SHELL
   end
 end

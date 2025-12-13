@@ -44,17 +44,8 @@ function M.get_redirect_uri(ngx)
 	return tackle_slash(drop_query())
 end
 function M.get_options(config, ngx)
-	-- Build session options with redundant keys for compatibility (v3/v4/openidc wrappers)
+	-- Build session options. Only set fields if configured, allowing Nginx vars to take precedence.
 	local session_opts = {
-		name = config.session_name or "session",
-		storage = config.session_storage or "cookie",
-		cookie = {
-			samesite = config.session_cookie_samesite or "None",
-			secure = config.session_cookie_secure ~= false,
-			httponly = config.session_cookie_httponly ~= false,
-			path = "/",
-			domain = nil,
-		},
 		redis = {
 			host = config.session_redis_host,
 			port = config.session_redis_port,
@@ -64,22 +55,28 @@ function M.get_options(config, ngx)
 			verify_ssl = config.session_redis_verify_ssl,
 			prefix = config.session_redis_prefix,
 		},
-		-- Flat keys sometimes used by bindings or older versions
-		cookie_same_site = config.session_cookie_samesite or "None",
-		cookie_secure = config.session_cookie_secure ~= false,
-		cookie_httponly = config.session_cookie_httponly ~= false,
-		cookie_path = "/",
+		cipher = "aes-256-gcm",
 	}
 
-	-- Add session secret if configured (decode from base64)
-	if config.session_secret then
-		local decoded_secret = ngx.decode_base64(config.session_secret)
-		if decoded_secret then
-			session_opts.secret = decoded_secret
-		else
-			kong.log.warn("session_secret could not be decoded from base64, using as-is")
-			session_opts.secret = config.session_secret
-		end
+	if config.session_name then
+		session_opts.name = config.session_name
+	end
+	if config.session_storage then
+		session_opts.strategy = config.session_storage
+	end
+
+	-- Only create cookie table if we have overrides. Otherwise let session lib use Nginx defaults.
+	if
+		config.session_cookie_samesite
+		or config.session_cookie_secure ~= nil
+		or config.session_cookie_httponly ~= nil
+	then
+		session_opts.cookie = {
+			samesite = config.session_cookie_samesite,
+			secure = config.session_cookie_secure,
+			httponly = config.session_cookie_httponly,
+			path = "/",
+		}
 	end
 
 	local options = {
