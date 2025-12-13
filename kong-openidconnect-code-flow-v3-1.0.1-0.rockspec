@@ -24,6 +24,10 @@ description = {
 dependencies = {
     "lua-resty-openidc ~> 1.7.6"
 }
+test_dependencies = {
+    "busted",
+    "luacov"
+}
 build = {
     type = "builtin",
     modules = {
