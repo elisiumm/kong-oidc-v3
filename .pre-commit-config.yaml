@@ -12,4 +12,4 @@ repos:
         entry: stylua
         language: system
         files: \.lua$
-        args: ["--check"]
+        args: []
