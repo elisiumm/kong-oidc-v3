@@ -5,8 +5,11 @@ repos:
       - id: luacheck
         args: ["--no-color", "-q"]
 
-  - repo: https://github.com/JohnnyMorganz/stylua
-    rev: v0.19.0
+  - repo: local
     hooks:
       - id: stylua
+        name: stylua
+        entry: stylua
+        language: system
+        files: \.lua$
         args: ["--check"]
