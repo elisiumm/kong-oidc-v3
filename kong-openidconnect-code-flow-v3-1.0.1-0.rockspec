@@ -1,4 +1,5 @@
 package = "kong-openidconnect-code-flow-v3"
+rockspec_format = "3.0"
 version = "1.0.1-0"
 source = {
     url = "git://github.com/elisiumm/kong-oidc-v3",
