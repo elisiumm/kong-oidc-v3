@@ -45,6 +45,7 @@ Vagrant.configure("2") do |config|
        qe.extra_netdev_args = "hostfwd=tcp::8000-:8000,hostfwd=tcp::8001-:8001,hostfwd=tcp::8002-:8002,hostfwd=tcp::8443-:8443"
     end
     kong.vm.provision "shell", inline: <<-SHELL
+    set -euo pipefail
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
       apt-get install -y curl gnupg2 lsb-release
@@ -69,6 +70,11 @@ Vagrant.configure("2") do |config|
       echo "admin_gui_listen = 0.0.0.0:8002" >> /etc/kong/kong.conf
       echo "admin_gui_url = http://localhost:8002" >> /etc/kong/kong.conf
       echo "plugins = bundled,oidc" >> /etc/kong/kong.conf
+      echo "nginx_proxy_include = /etc/kong/nginx_oidc_variables.conf" >> /etc/kong/kong.conf
+      echo "nginx_http_lua_shared_dict = discovery 30m" >> /etc/kong/kong.conf
+
+      SESSION_SECRET="$(openssl rand -base64 32)"
+      printf "set \\$session_secret '%s';\n" "$SESSION_SECRET" | sudo tee /etc/kong/nginx_oidc_variables.conf >/dev/null
 
       sudo -i -u postgres psql -c "CREATE USER kong WITH PASSWORD 'super_secret';"
       sudo -i -u postgres psql -c "CREATE DATABASE kong OWNER kong;"
