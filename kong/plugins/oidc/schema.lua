@@ -163,6 +163,53 @@ return {
             }
           },
           {
+            session_redis_prefix = {
+              type = "string",
+              required = false,
+              default = "sessions"
+            }
+          },
+          {
+            session_redis_host = {
+              type = "string",
+              required = false,
+              default = "127.0.0.1"
+            }
+          },
+          {
+            session_redis_port = {
+              type = "number",
+              required = false,
+              default = 6379
+            }
+          },
+          {
+            session_redis_auth = {
+              type = "string",
+              required = false
+            }
+          },
+          {
+            session_redis_ssl = {
+              type = "boolean",
+              required = false,
+              default = false
+            }
+          },
+          {
+            session_redis_server_name = {
+              type = "string",
+              required = false
+            }
+          },
+          {
+            session_redis_verify_ssl = {
+              type = "boolean",
+              required = false,
+              default = true
+            }
+          },
+          {
             recovery_page_path = {
               type = "string"
             }

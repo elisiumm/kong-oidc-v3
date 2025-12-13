@@ -56,6 +56,15 @@ function M.get_options(config, ngx)
       path = "/",
       domain = nil
     },
+    redis = {
+      host = config.session_redis_host,
+      port = config.session_redis_port,
+      auth = config.session_redis_auth,
+      ssl = config.session_redis_ssl,
+      server_name = config.session_redis_server_name,
+      verify_ssl = config.session_redis_verify_ssl,
+      prefix = config.session_redis_prefix
+    },
     -- Flat keys sometimes used by bindings or older versions
     cookie_same_site = config.session_cookie_samesite or "None",
     cookie_secure = config.session_cookie_secure ~= false,
