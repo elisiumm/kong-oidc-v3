@@ -1,0 +1,23 @@
+scan:
+  scanners:
+    - vuln
+    - misconfig
+    - secret
+    # - license # License scanning can be noisy, enable if needed
+
+pkg:
+  types:
+    - os
+    - library
+
+# misconfiguration:
+#   # Check for misconfigurations in IaC (though this is largely a Lua repo, it checks Dockerfiles/K8s/Terraform if present)
+#   scanners:
+#     - dockerfile
+#     - kubernetes
+#     - terraform
+#     - cloudformation
+
+secret:
+  # Scan for secrets in files
+  enable: true

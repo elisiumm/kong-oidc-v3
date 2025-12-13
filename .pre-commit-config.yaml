@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/lunarmodules/luacheck
+    rev: v0.26.0
+    hooks:
+      - id: luacheck
+        args: ["--no-color", "-q"]
+
+  - repo: local
+    hooks:
+      - id: stylua
+        name: stylua
+        entry: stylua
+        language: system
+        files: \.lua$
+        args: []
